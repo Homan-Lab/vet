@@ -2,3 +2,12 @@
 *.csv
 *.pdf
 
+# Local
+.vscode
+
+# Mac
+.DS_Store
+
+__pycache__\
+*.py[cod]
+*$py.class
