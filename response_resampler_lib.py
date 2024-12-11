@@ -41,6 +41,7 @@ from absl import logging
 import numpy as np
 import datatypes
 import machine_contest_metrics as mcm
+import cat_machine_contest_metrics as cmcm
 import pandas as pd
 
 class TypesEnumBase(enum.Enum):
@@ -544,8 +545,20 @@ class Experiment:
         "recall": mcm.recall,
         "f1_score": mcm.f1_score,
         "auc": mcm.auc,
+        "cat_accuracy": cmcm.cat_accuracy,
+        "cat_precision": cmcm.cat_precision,
+        "cat_recall": cmcm.cat_recall,
+        "cat_f1_score": cmcm.cat_f1_score,
+        "cat_auc": cmcm.cat_auc,
+        "cat_mean_absolute_error": cmcm.cat_mean_absolute_error,
     }
-    response_aggregators = {"mean": np.mean, "median": np.median, "noop": noop}
+    response_aggregators = {
+        "mean": np.mean,
+        "median": np.median,
+        "noop": noop,
+        "majority_vote": cmcm.majority_vote,
+        "freq": cmcm.freq_agg,
+    }
     shapers = {
         "noop": noop,
         "flatten": flatten_matrix,
