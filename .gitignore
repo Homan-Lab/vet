@@ -4,6 +4,8 @@
 
 # Local
 .vscode
+data
+output
 
 # Mac
 .DS_Store
