@@ -55,6 +55,16 @@ _RANDOM_SEED = flags.DEFINE_integer(
     None,
     "When set, it generates the data in deterministically across runs.",
 )
+_DIR_PRIOR_PROB_DIST = flags.DEFINE_string(
+    "dir_prior_prob_dist",
+    None,
+    "Probability distribution using numpy random generator",
+)
+_DIR_PRIOR_PROB_DIST_PARAMS = flags.DEFINE_list(
+    "dir_prior_prob_dist_params",
+    None,
+    "Parameters for the probability distribution",
+)
 
 # for how to use this library.
 def main(argv: Sequence[str]) -> None:
@@ -74,6 +84,8 @@ def main(argv: Sequence[str]) -> None:
       _NOISE_PARAMS.value,
       _DISTORTION.value,
       _NUM_SAMPLES.value,
+      _DIR_PRIOR_PROB_DIST.value,
+      _DIR_PRIOR_PROB_DIST_PARAMS.value,
   )
   elapsed_time = datetime.datetime.now() - generation_start_time
   logging.info("Data generation time=%f", elapsed_time.total_seconds())

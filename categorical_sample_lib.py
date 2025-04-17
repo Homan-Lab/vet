@@ -132,6 +132,8 @@ def simulate_response_tables_cat(
     noise_parameters: List[float] = [0.333, 0.333, 0.334],
     distortion: float = 0.1,
     num_samples: int = 1000,
+    dir_prior_prob_dist = None,
+    dir_prior_prob_dist_params = None,
 ) -> datatypes.ResponseSets:
   """Generates a collection of machine responses.
 
@@ -142,7 +144,7 @@ def simulate_response_tables_cat(
       k_responses (int, optional): Number of responses per item. Defaults to 5.
       m_categories (int, optional): Number of categories. Defaults to 3.
       alpha (List[float], optional): Categorical parameters. Defaults to [0.6, 0.1, 0.3].
-      noise_parameters (List[float], optional): Noise parameters. Defaults to [0.333, 0.333, 0.333].
+      noise_parameters (List[float], optional): Noise parameters. Defaults to [0.333, 0.333, 0.334].
       distortion (float, optional): Distortion value. Defaults to 0.1.
       num_samples (int, optional): Number of samples of size n_items x k_responses. Defaults to 1000.
 
@@ -153,6 +155,20 @@ def simulate_response_tables_cat(
   responses_null = []
 
   for _ in range(num_samples):
+    if dir_prior_prob_dist is not None:
+      if dir_prior_prob_dist_params is not None:
+        alpha = dir_prior_prob_dist(*dir_prior_prob_dist_params)
+      else:
+        alpha = dir_prior_prob_dist()
+      if len(alpha) != m_categories:
+        logging.info(f"Length of alpha parameters: {len(alpha)} does not match the number of categories: {m_categories}")
+        break
+
+    if len(noise_parameters)!=m_categories:
+      logging.info(f"Length of noise parameters: {len(noise_parameters)} does not match the number of categories: {m_categories}")
+      noise_parameters = [1.0/m_categories]*m_categories
+      logging.info(f"Using uniform noise parameters: {noise_parameters}")
+
     categorical_params = gen_dirichlet_samples(alpha=alpha, n=n_items)
     noise_params = gen_dirichlet_samples(alpha=noise_parameters, n=n_items)
 
@@ -194,4 +210,7 @@ def simulate_response_tables_cat(
   return response_sets
 
 if __name__ == "__main__":
-  simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3)
+  response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3)
+  # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform,dir_prior_prob_dist_params=[0,1,3])
+  # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform,dir_prior_prob_dist_params=[0,1,2])
+  logging.info(len(response_sets.alt_data_list))
