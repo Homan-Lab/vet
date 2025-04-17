@@ -551,6 +551,9 @@ class Experiment:
         "cat_f1_score": cmcm.cat_f1_score,
         "cat_auc": cmcm.cat_auc,
         "cat_mean_absolute_error": cmcm.cat_mean_absolute_error,
+        "cat_wins_mae": cmcm.cat_wins_mae,
+        "cat_kl_div": cmcm.cat_kl_div,
+        "cat_jsd": cmcm.cat_jsd,
     }
     response_aggregators = {
         "mean": np.mean,
