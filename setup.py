@@ -2,7 +2,7 @@
 
 import setuptools
 
-REQUIRED_PACKAGES = ['absl-py', 'numpy', 'pandas', 'scikit-learn', 'scipy']
+REQUIRED_PACKAGES = ['absl-py', 'numpy', 'pandas', 'scikit-learn', 'scipy', 'pathos']
 
 setuptools.setup(
     name='vet',

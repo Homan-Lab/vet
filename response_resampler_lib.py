@@ -37,6 +37,7 @@ import functools
 import re
 from typing import Any, Callable, Mapping, Tuple
 
+import pathos.multiprocessing as mp
 from absl import logging
 import numpy as np
 import datatypes
@@ -331,6 +332,7 @@ class Experiment:
       self,
       alt_samples: list[datatypes.ResponseData],
       null_samples: list[datatypes.ResponseData],
+      use_multiprocessing: bool = False,
   ):
     """Compute p-value via parametric bootstrapping to be used as ground truth.
 
@@ -339,14 +341,29 @@ class Experiment:
       null_samples: ResponseData list of responses for the null hypothesis.
     """
 
-    null1_scores, null2_scores = np.transpose([
-        self.run_trial(null_sample, self.ground_sampler)
-        for null_sample in null_samples
-    ])
-    alt1_scores, alt2_scores = np.transpose([
-        self.run_trial(alt_sample, self.ground_sampler)
-        for alt_sample in alt_samples
-    ])
+    if use_multiprocessing:
+      null_trial_args = [(null_sample, self.ground_sampler) for null_sample in null_samples]
+      null_scores_trials = []
+      with mp.Pool(mp.cpu_count()) as pool:
+        null_scores_trials = pool.starmap(self.run_trial, null_trial_args)
+
+      null1_scores, null2_scores = np.transpose(null_scores_trials)
+
+      alt_trial_args = [(alt_sample, self.ground_sampler) for alt_sample in alt_samples]
+      alt_scores_trials = []
+      with mp.Pool(mp.cpu_count()) as pool:
+        alt_scores_trials = pool.starmap(self.run_trial, alt_trial_args)
+
+      alt1_scores, alt2_scores = np.transpose(alt_scores_trials)
+    else:
+      null1_scores, null2_scores = np.transpose([
+          self.run_trial(null_sample, self.ground_sampler)
+          for null_sample in null_samples
+      ])
+      alt1_scores, alt2_scores = np.transpose([
+          self.run_trial(alt_sample, self.ground_sampler)
+          for alt_sample in alt_samples
+      ])
 
     self.sample_results[GroundStatTypes.M1_GT_NULL.value] = null1_scores
     self.sample_results[GroundStatTypes.M2_GT_NULL.value] = null2_scores
@@ -356,6 +373,7 @@ class Experiment:
   def _get_nonparametric_bootstrap_results(
       self,
       alt_sample: datatypes.ResponseData,
+      use_multiprocessing: bool = False,
   ):
     """Run bootstrap tests and add results to _sample_results.
 
@@ -365,9 +383,18 @@ class Experiment:
     """
 
     # Compute scores for alternative hypothesis test.
-    alt1_scores, alt2_scores = np.transpose([
-        self.run_trial(alt_sample, self.sampler) for _ in range(self.num_trials)
-    ])
+
+    if use_multiprocessing:
+      alt_trial_args = [(alt_sample, self.sampler) for _ in range(self.num_trials)]
+      alt_scores_trials = []
+      with mp.Pool(mp.cpu_count()) as pool:
+        alt_scores_trials = pool.starmap(self.run_trial, alt_trial_args)
+
+      alt1_scores, alt2_scores = np.transpose(alt_scores_trials)
+    else:
+      alt1_scores, alt2_scores = np.transpose([
+          self.run_trial(alt_sample, self.sampler) for _ in range(self.num_trials)
+      ])
 
     # Construct null hypothesis data by pooling alt samples and compute scores.
     null_responses = np.concatenate(
@@ -376,9 +403,18 @@ class Experiment:
     null_test = datatypes.ResponseData(
         alt_sample.gold, null_responses, null_responses
     )
-    null1_scores, null2_scores = np.transpose([
-        self.run_trial(null_test, self.sampler) for _ in range(self.num_trials)
-    ])
+
+    if use_multiprocessing:
+      null_trial_args = [(null_test, self.sampler) for _ in range(self.num_trials)]
+      null_scores_trials = []
+      with mp.Pool(mp.cpu_count()) as pool:
+        null_scores_trials = pool.starmap(self.run_trial, null_trial_args)
+
+      null1_scores, null2_scores = np.transpose(null_scores_trials)
+    else:
+      null1_scores, null2_scores = np.transpose([
+          self.run_trial(null_test, self.sampler) for _ in range(self.num_trials)
+      ])
 
     alt_test_diffs = alt1_scores - alt2_scores
     null_test_diffs = null1_scores - null2_scores
@@ -661,6 +697,7 @@ class Experiment:
       self,
       alt_samples: list[datatypes.ResponseData],
       null_samples: list[datatypes.ResponseData],
+      use_multiprocessing: bool = False,
   ) -> Mapping[str, float]:
     """Executes an experiment given sample data.
 
@@ -678,10 +715,10 @@ class Experiment:
     self.sample_results = collections.defaultdict(list)
 
     # Compute estimated p-value and other experiment stats.
-    self._get_nonparametric_bootstrap_results(alt_samples[0])
+    self._get_nonparametric_bootstrap_results(alt_samples[0], use_multiprocessing)
 
     # Compute "ground-truth" p-value and other experiment stats.
-    self._get_parametric_bootstrap_results(alt_samples[1:], null_samples[1:])
+    self._get_parametric_bootstrap_results(alt_samples[1:], null_samples[1:], use_multiprocessing)
 
     return self._aggregate_experiment_results()
 
@@ -695,6 +732,7 @@ class ExperimentsManager:
       config_line_num: int,
       k_responses: int,
       output_file_path: str,
+      use_multiprocessing: bool = False,
   ):
     """Initializer for ExperimentsManager class.
 
@@ -711,6 +749,7 @@ class ExperimentsManager:
     self.line = config_line_num
     self.k_responses = k_responses
     self.output_file_path = output_file_path
+    self.use_multiprocessing = use_multiprocessing
 
     logging.info("Opening config file %s", config_file_path)
     with open(config_file_path, "r") as f:
@@ -733,7 +772,7 @@ class ExperimentsManager:
       experiment = Experiment(config_row, self.k_responses)
       start_time = datetime.datetime.now()
       results = experiment.run_experiment(
-          self.response_sets.alt_data_list, self.response_sets.null_data_list
+          self.response_sets.alt_data_list, self.response_sets.null_data_list, self.use_multiprocessing,
       )
       self.save_experiment_results(results, row_idx)
 

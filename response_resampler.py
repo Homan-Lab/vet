@@ -66,6 +66,11 @@ _USE_PICKLE = flags.DEFINE_boolean(
     "If true load the data using pickle. Otherwise load using json."
     "Pickle is much faster as it saves the data in binary format.",
 )
+_USE_MULTIPROCESSING = flags.DEFINE_boolean(
+    "use_multiprocessing",
+    False,
+    "If true use multiprocessing, otherwise run trials serially.",
+)
 _RANDOM_SEED = flags.DEFINE_integer(
     "random_seed",
     None,
@@ -83,6 +88,7 @@ def main(_):
   k_responses = _K_RESPONSES.value
   config_file = _CONFIG_FILE.value
   config_line_num = _LINE_NUM.value
+  use_multiprocessing = _USE_MULTIPROCESSING.value
 
   logging.info(
       "Running ptest experiments with command line arguments:"
@@ -122,6 +128,7 @@ def main(_):
       config_line_num,
       k_responses,
       output_file_path,
+      use_multiprocessing,
   )
 
   logging.info("Experiments set up. Getting ready to run.")
