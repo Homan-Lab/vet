@@ -9,7 +9,7 @@
 #SBATCH --mem=24g
 #SBATCH --constraint=rhel9
 #SBATCH --account=population
-#SBATCH --job-name=d3code_test
+#SBATCH --job-name=toxicity_test
 #SBATCH --mail-user=slack:@dp2900
 #SBATCH --mail-type=ALL
 
@@ -28,10 +28,10 @@ for pair in "${pairs[@]}"; do
 	k_responses=${k_responses%.*}
 	echo "Value1: $n_items, Value2: $k_responses"
 
-	# for d in 0.15 0.2 0.3 0.4
+	# for d in 0.1 0.2 0.3 0.4
 	for d in 0.1
 	do
-		python categorical_sample.py --n_items=${n_items} --k_responses=${k_responses} --m_categories=2 --alpha="6.08113935,2.88368607" --noise_parameters="0.5,0.5" --num_samples=1000 --distortion=${d} --use_pickle=true --exp_dir=../ptest_arr_d3code/
-		python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --use_multiprocessing=true --exp_dir=../ptest_arr_d3code/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=${n_items}_K=${k_responses}_M=2_num_samples=1000.pkl
+		python categorical_sample.py --n_items=${n_items} --k_responses=${k_responses} --m_categories=2 --alpha="1.37658107,1.33054633" --noise_parameters="0.5,0.5" --num_samples=1000 --distortion=${d} --use_pickle=true --exp_dir=../ptest_arr_toxicity/
+		python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --use_multiprocessing=true --exp_dir=../ptest_arr_toxicity/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=${n_items}_K=${k_responses}_M=2_num_samples=1000.pkl
 	done
 done
