@@ -17,7 +17,7 @@ for pair in "${pairs[@]}"; do
 	for d in 0.05 0.1 0.2 0.3 0.4
 	do
 		python categorical_sample.py --n_items=${n_items} --k_responses=${k_responses} --m_categories=5 --alpha="1039.76103107,38.24111517,35.57247128,310.28721781,46.02098984" --noise_parameters="0.2,0.2,0.2,0.2,0.2" --num_samples=1000 --distortion=${d} --use_pickle=true --exp_dir=../../../../data/ptest_arr_jobsQ1/
-		python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --exp_dir=../../../../data/ptest_arr_jobsQ1/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=${n_items}_K=${k_responses}_M=5_num_samples=1000.pkl
+		python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --use_multiprocessing=true --exp_dir=../../../../data/ptest_arr_jobsQ1/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=${n_items}_K=${k_responses}_M=5_num_samples=1000.pkl
 		# python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --exp_dir=../../../../data/ptest_arr_jobsQ1/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=5000_K=100_M=5_num_samples=1000.pkl
 	done
 done

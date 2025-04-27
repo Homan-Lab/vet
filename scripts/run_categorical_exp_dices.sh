@@ -17,7 +17,7 @@ for d in 0.3
 		echo "Value1: $n_items, Value2: $k_responses"
 	
 		python categorical_sample.py --n_items=${n_items} --k_responses=${k_responses} --num_samples=1000 --distortion=${d} --use_pickle=true --exp_dir=../../../../data/ptest_arr_dices/
-		python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --exp_dir=../../../../data/ptest_arr_dices/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=${n_items}_K=${k_responses}_M=3_num_samples=1000.pkl
+		python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --use_multiprocessing=true --exp_dir=../../../../data/ptest_arr_dices/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=${n_items}_K=${k_responses}_M=3_num_samples=1000.pkl
 		# python response_resampler.py --line_num=-1 --n_items=${n_items} --k_responses=${k_responses} --config_file=example_config.csv --use_pickle=true --exp_dir=../../../../data/ptest_arr_dices/ --input_response_file=cat_responses_simulated_distr_dist=${d}_gen_N=5000_K=100_M=3_num_samples=1000.pkl
 	done
 done
