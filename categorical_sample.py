@@ -65,6 +65,11 @@ _DIR_PRIOR_PROB_DIST_PARAMS = flags.DEFINE_list(
     None,
     "Parameters for the probability distribution",
 )
+_COMPUTE_ACTUAL_P_VALUES = flags.DEFINE_boolean(
+    "compute_actual_p_values",
+    False,
+    "If true use categorical params directly to compute metrics and p-values.",
+)
 
 # for how to use this library.
 def main(argv: Sequence[str]) -> None:
@@ -76,17 +81,32 @@ def main(argv: Sequence[str]) -> None:
     np.random.seed(_RANDOM_SEED.value)
 
   generation_start_time = datetime.datetime.now()
-  response_sets = cat_sample.simulate_response_tables_cat(
-      _N_ITEMS.value,
-      _K_RESPONSES.value,
-      _M_CATEGORIES.value,
-      _ALPHA.value,
-      _NOISE_PARAMS.value,
-      _DISTORTION.value,
-      _NUM_SAMPLES.value,
-      _DIR_PRIOR_PROB_DIST.value,
-      _DIR_PRIOR_PROB_DIST_PARAMS.value,
-  )
+  if _COMPUTE_ACTUAL_P_VALUES.value:
+    response_sets, actual_response_sets = cat_sample.simulate_response_tables_cat(
+        _N_ITEMS.value,
+        _K_RESPONSES.value,
+        _M_CATEGORIES.value,
+        _ALPHA.value,
+        _NOISE_PARAMS.value,
+        _DISTORTION.value,
+        _NUM_SAMPLES.value,
+        _DIR_PRIOR_PROB_DIST.value,
+        _DIR_PRIOR_PROB_DIST_PARAMS.value,
+        _COMPUTE_ACTUAL_P_VALUES.value,
+    )
+  else:
+    response_sets = cat_sample.simulate_response_tables_cat(
+        _N_ITEMS.value,
+        _K_RESPONSES.value,
+        _M_CATEGORIES.value,
+        _ALPHA.value,
+        _NOISE_PARAMS.value,
+        _DISTORTION.value,
+        _NUM_SAMPLES.value,
+        _DIR_PRIOR_PROB_DIST.value,
+        _DIR_PRIOR_PROB_DIST_PARAMS.value,
+    )
+    
   elapsed_time = datetime.datetime.now() - generation_start_time
   logging.info("Data generation time=%f", elapsed_time.total_seconds())
 
@@ -102,6 +122,17 @@ def main(argv: Sequence[str]) -> None:
   write_samples_to_file(
       response_sets, output_filename, _USE_PICKLE.value
   )
+  
+  if _COMPUTE_ACTUAL_P_VALUES.value:
+    output_filename = os.path.join(
+        _EXP_DIR.value,
+        f"cat_actual_responses_simulated_distr_dist={_DISTORTION.value}_gen_N="
+        f"{_N_ITEMS.value}_K={_K_RESPONSES.value}_M={_M_CATEGORIES.value}"
+        f"_num_samples={_NUM_SAMPLES.value}.{file_extension}",
+    )
+    write_samples_to_file(
+        actual_response_sets, output_filename, _USE_PICKLE.value
+    )
 
 if __name__ == "__main__":
   app.run(main)

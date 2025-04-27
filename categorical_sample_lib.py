@@ -134,6 +134,7 @@ def simulate_response_tables_cat(
     num_samples: int = 1000,
     dir_prior_prob_dist = None,
     dir_prior_prob_dist_params = None,
+    compute_actual_p_values: bool = False,
 ) -> datatypes.ResponseSets:
   """Generates a collection of machine responses.
 
@@ -158,6 +159,10 @@ def simulate_response_tables_cat(
     logging.info(f"Length of noise parameters: {len(noise_parameters)} does not match the number of categories: {m_categories}")
     noise_parameters = [1.0/m_categories]*m_categories
     logging.info(f"Using uniform noise parameters: {noise_parameters}")
+
+  if compute_actual_p_values:
+    actual_responses_alt = []
+    actual_responses_null = []
   
   for _ in range(num_samples):
     if dir_prior_prob_dist is not None:
@@ -181,6 +186,13 @@ def simulate_response_tables_cat(
             gold=responses_gold, preds1=responses_y, preds2=responses_z
         )
     )
+
+    if compute_actual_p_values:
+      actual_responses_alt.append(
+        datatypes.ResponseData(
+            gold=categorical_params, preds1=categorical_params, preds2=distorted_params
+        )
+      )
     # print(responses_gold.shape, responses_y.shape, responses_z.shape)
     # print(responses_gold[:3], responses_y[:3], responses_z[:3])
 
@@ -197,19 +209,33 @@ def simulate_response_tables_cat(
         )
     )
 
+    if compute_actual_p_values:
+      actual_responses_null.append(
+          datatypes.ResponseData(
+              gold=categorical_params_null, preds1=categorical_params_null, preds2=distorted_params_null
+          )
+      )
+
   response_sets = datatypes.ResponseSets(
       alt_data_list=responses_alt, null_data_list=responses_null
   )
+
+  if compute_actual_p_values:
+    actual_response_sets = datatypes.ResponseSets(
+        alt_data_list=actual_responses_alt, null_data_list=actual_responses_null
+    )
+    return response_sets, actual_response_sets
 
   return response_sets
 
 if __name__ == "__main__":
   start_time = datetime.datetime.now()
-  response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3)
+  # response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3)
+  response_sets, actual_response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3,compute_actual_p_values=True)
   # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform,dir_prior_prob_dist_params=[0,1,3])
   # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform,dir_prior_prob_dist_params=[0,1,2])
-  logging.info(len(response_sets.alt_data_list))
-  print(len(response_sets.alt_data_list))
+  logging.info(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
+  print(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
   elapsed_time = datetime.datetime.now() - start_time
   logging.info("Data generation time=", elapsed_time.total_seconds())
   print(f"Data generation time = {elapsed_time.total_seconds()}")
