@@ -590,6 +590,10 @@ class Experiment:
         "cat_wins_mae": cmcm.cat_wins_mae,
         "cat_kl_div": cmcm.cat_kl_div,
         "cat_jsd": cmcm.cat_jsd,
+        "cat_actual_accuracy": cmcm.cat_actual_accuracy,
+        "cat_actual_mean_absolute_error": cmcm.cat_actual_mean_absolute_error,
+        "cat_actual_wins_mae": cmcm.cat_actual_wins_mae,
+        "cat_actual_kl_div": cmcm.cat_actual_kl_div,
     }
     response_aggregators = {
         "mean": np.mean,
