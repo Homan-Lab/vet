@@ -8,14 +8,12 @@ import sklearn.metrics
 def binarize(scores: np.ndarray, threshold: float) -> np.ndarray:
   return np.where(scores < threshold, 0, 1)
 
-def freq_agg(arr: np.ndarray, num_categories: int = 3):
-  return np.array([np.sum(arr == x) for x in range(num_categories)])
+def freq_agg(arr: np.ndarray, num_categories: int = 3) -> np.ndarray:
+  return np.apply_along_axis(lambda x: np.bincount(x, minlength=num_categories), axis=1, arr=arr)
 
-def majority_vote(arr: np.ndarray, num_categories: int = 3):
-  return np.argmax(np.array([np.sum(arr == x) for x in range(num_categories)]))
-
-# def majority_vote(arr: np.ndarray):
-#   return st.mode(arr).mode
+def majority_vote(arr: np.ndarray, num_categories: int = 3) -> np.ndarray:
+    counts = freq_agg(arr=arr, num_categories=num_categories)
+    return np.argmax(counts, axis=1)
 
 def cat_accuracy(
     human: np.ndarray,
@@ -38,9 +36,9 @@ def cat_accuracy(
   """
 
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([majority_vote(x, num_categories) for x in human])
-  machine1 = np.array([majority_vote(x, num_categories) for x in machine1])
-  machine2 = np.array([majority_vote(x, num_categories) for x in machine2])
+  human = majority_vote(human, num_categories)
+  machine1 = majority_vote(machine1, num_categories)
+  machine2 = majority_vote(machine2, num_categories)
 
   return (
       sklearn.metrics.accuracy_score(human, machine1),
@@ -123,9 +121,9 @@ def cat_f1_score(
   """
 
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([majority_vote(x, num_categories) for x in human])
-  machine1 = np.array([majority_vote(x, num_categories) for x in machine1])
-  machine2 = np.array([majority_vote(x, num_categories) for x in machine2])
+  human = majority_vote(human, num_categories)
+  machine1 = majority_vote(machine1, num_categories)
+  machine2 = majority_vote(machine2, num_categories)
 
   return (
       sklearn.metrics.f1_score(human, machine1, average='micro'),
@@ -153,9 +151,9 @@ def cat_precision(
   """
 
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([majority_vote(x, num_categories) for x in human])
-  machine1 = np.array([majority_vote(x, num_categories) for x in machine1])
-  machine2 = np.array([majority_vote(x, num_categories) for x in machine2])
+  human = majority_vote(human, num_categories)
+  machine1 = majority_vote(machine1, num_categories)
+  machine2 = majority_vote(machine2, num_categories)
 
   return (
       sklearn.metrics.precision_score(human, machine1),
@@ -183,9 +181,9 @@ def cat_recall(
   """
   
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([majority_vote(x, num_categories) for x in human])
-  machine1 = np.array([majority_vote(x, num_categories) for x in machine1])
-  machine2 = np.array([majority_vote(x, num_categories) for x in machine2])
+  human = majority_vote(human, num_categories)
+  machine1 = majority_vote(machine1, num_categories)
+  machine2 = majority_vote(machine2, num_categories)
 
   return (
       sklearn.metrics.recall_score(human, machine1),
@@ -207,9 +205,9 @@ def cat_mean_absolute_error(
     responses, and of the other machine and the human responses.
   """
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([freq_agg(x, num_categories) for x in human])
-  machine1 = np.array([freq_agg(x, num_categories) for x in machine1])
-  machine2 = np.array([freq_agg(x, num_categories) for x in machine2])
+  human = freq_agg(human, num_categories)
+  machine1 = freq_agg(machine1, num_categories)
+  machine2 = freq_agg(machine2, num_categories)
 
   human = human/np.sum(human, axis=-1, keepdims=True)
   machine1 = machine1/np.sum(machine1, axis=-1, keepdims=True)
@@ -254,9 +252,9 @@ def cat_wins_mae(
   """
 
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([freq_agg(x, num_categories) for x in human])
-  machine1 = np.array([freq_agg(x, num_categories) for x in machine1])
-  machine2 = np.array([freq_agg(x, num_categories) for x in machine2])
+  human = freq_agg(human, num_categories)
+  machine1 = freq_agg(machine1, num_categories)
+  machine2 = freq_agg(machine2, num_categories)
 
   # human = human/np.sum(human, axis=-1, keepdims=True)
   # machine1 = machine1/np.sum(machine1, axis=-1, keepdims=True)
@@ -308,9 +306,9 @@ def cat_kl_div(
     responses, and of the other machine and the human responses.
   """
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([freq_agg(x, num_categories) for x in human]) + 1e-12
-  machine1 = np.array([freq_agg(x, num_categories) for x in machine1]) + 1e-12
-  machine2 = np.array([freq_agg(x, num_categories) for x in machine2]) + 1e-12
+  human = freq_agg(human, num_categories) + 1e-12
+  machine1 = freq_agg(machine1, num_categories) + 1e-12
+  machine2 = freq_agg(machine2, num_categories) + 1e-12
 
   # human = human/np.sum(human, axis=-1, keepdims=True)
   # machine1 = machine1/np.sum(machine1, axis=-1, keepdims=True)
@@ -360,9 +358,9 @@ def cat_jsd(
     responses, and of the other machine and the human responses.
   """
   num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
-  human = np.array([freq_agg(x, num_categories) for x in human]) + 1e-12
-  machine1 = np.array([freq_agg(x, num_categories) for x in machine1]) + 1e-12
-  machine2 = np.array([freq_agg(x, num_categories) for x in machine2]) + 1e-12
+  human = freq_agg(human, num_categories) + 1e-12
+  machine1 = freq_agg(machine1, num_categories) + 1e-12
+  machine2 = freq_agg(machine2, num_categories) + 1e-12
 
   # human = human/np.sum(human, axis=-1, keepdims=True)
   # machine1 = machine1/np.sum(machine1, axis=-1, keepdims=True)
