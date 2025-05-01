@@ -9,6 +9,7 @@ from typing import Any, Callable, List, Tuple
 from absl import logging
 import numpy as np
 import datatypes
+import cat_machine_contest_metrics as cmcm
 
 
 def gen_dirichlet_samples(
@@ -132,8 +133,8 @@ def simulate_response_tables_cat(
     noise_parameters: List[float] = [0.333, 0.333, 0.334],
     distortion: float = 0.1,
     num_samples: int = 1000,
-    dir_prior_prob_dist = None,
-    dir_prior_prob_dist_params = None,
+    dir_prior_prob_dist: str = None,
+    dir_prior_prob_dist_params: List[Any] = None,
     compute_actual_p_values: bool = False,
 ) -> datatypes.ResponseSets:
   """Generates a collection of machine responses.
@@ -152,6 +153,16 @@ def simulate_response_tables_cat(
   Returns:
       datatypes.ResponseSets: _description_
   """
+
+  prior_distributions = {
+      "beta": np.random.default_rng().beta,
+      "exponential": np.random.default_rng().exponential,
+      "gamma": np.random.default_rng().gamma,
+      "lognormal": np.random.default_rng().lognormal,
+      "normal": np.random.default_rng().normal,
+      "uniform": np.random.default_rng().uniform,
+  }
+
   responses_alt = []
   responses_null = []
 
@@ -166,12 +177,19 @@ def simulate_response_tables_cat(
   
   for _ in range(num_samples):
     if dir_prior_prob_dist is not None:
-      if dir_prior_prob_dist_params is not None:
-        alpha = dir_prior_prob_dist(*dir_prior_prob_dist_params)
+      dir_prior_dist = prior_distributions.get(dir_prior_prob_dist)
+      if dir_prior_dist:
+        if dir_prior_prob_dist_params is not None:
+          alpha = dir_prior_dist(*list(map(float, dir_prior_prob_dist_params)), size=m_categories)
+        else:
+          alpha = dir_prior_dist(size=m_categories)
+        if len(alpha) != m_categories:
+          logging.info(f"Length of alpha parameters: {len(alpha)} do not match the number of categories: {m_categories}")
+          print(f"Length of alpha parameters: {len(alpha)} do not match the number of categories: {m_categories}")
+          break
       else:
-        alpha = dir_prior_prob_dist()
-      if len(alpha) != m_categories:
-        logging.info(f"Length of alpha parameters: {len(alpha)} does not match the number of categories: {m_categories}")
+        logging.info("Prior distribution not supported")
+        print("Prior distribution not supported")
         break
 
     categorical_params = gen_dirichlet_samples(alpha=alpha, n=n_items)
@@ -231,11 +249,20 @@ def simulate_response_tables_cat(
 if __name__ == "__main__":
   start_time = datetime.datetime.now()
   # response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3)
-  response_sets, actual_response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3,compute_actual_p_values=True)
-  # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform,dir_prior_prob_dist_params=[0,1,3])
-  # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform,dir_prior_prob_dist_params=[0,1,2])
-  logging.info(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
-  print(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
+  # response_sets, actual_response_sets = simulate_response_tables_cat(n_items=50,k_responses=10,m_categories=3,compute_actual_p_values=True)
+  # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform)
+  response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist="uniform",dir_prior_prob_dist_params=[0,1])
+  
+  logging.info(len(response_sets.alt_data_list))
+  print(len(response_sets.alt_data_list))
+
+  # logging.info(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
+  # print(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
+  
   elapsed_time = datetime.datetime.now() - start_time
   logging.info("Data generation time=", elapsed_time.total_seconds())
   print(f"Data generation time = {elapsed_time.total_seconds()}")
+
+  start_time = datetime.datetime.now()
+  print(cmcm.cat_accuracy(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
+  print(f"Elapsed time = {(datetime.datetime.now() - start_time).total_seconds()}")
