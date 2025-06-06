@@ -80,6 +80,11 @@ _PREFIX = flags.DEFINE_string(
     "responses_simulated_distr",
     "create unique prefix for output file",
 )
+_COMPRESSION = flags.DEFINE_string(
+    "compression",
+    None,
+    "Specifies the compression to use (gz, bz2, xz, or lz4).",
+)
 
 # for how to use this library.
 def main(argv: Sequence[str]) -> None:
@@ -102,6 +107,10 @@ def main(argv: Sequence[str]) -> None:
   logging.info("Data generation time=%f", elapsed_time.total_seconds())
 
   file_extension = "pkl" if _USE_PICKLE.value else "json"
+  
+  if _USE_PICKLE.value and _COMPRESSION.value is not None:
+    file_extension = f"{file_extension}.{_COMPRESSION.value}"
+
   output_filename = os.path.join(
       _EXP_DIR.value,
       f"{_PREFIX.value}_dist={_DISTORTION.value}_gen_N="

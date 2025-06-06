@@ -70,6 +70,11 @@ _COMPUTE_ACTUAL_P_VALUES = flags.DEFINE_boolean(
     False,
     "If true use categorical params directly to compute metrics and p-values.",
 )
+_COMPRESSION = flags.DEFINE_string(
+    "compression",
+    None,
+    "Specifies the compression to use (gz, bz2, xz, or lz4).",
+)
 
 # for how to use this library.
 def main(argv: Sequence[str]) -> None:
@@ -111,6 +116,10 @@ def main(argv: Sequence[str]) -> None:
   logging.info("Data generation time=%f", elapsed_time.total_seconds())
 
   file_extension = "pkl" if _USE_PICKLE.value else "json"
+  
+  if _USE_PICKLE.value and _COMPRESSION.value is not None:
+    file_extension = f"{file_extension}.{_COMPRESSION.value}"
+  
   if not os.path.exists(_EXP_DIR.value):
     os.mkdir(_EXP_DIR.value)
   output_filename = os.path.join(

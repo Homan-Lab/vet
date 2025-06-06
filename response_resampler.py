@@ -76,6 +76,11 @@ _RANDOM_SEED = flags.DEFINE_integer(
     None,
     "When set, it generates the data in deterministically across runs.",
 )
+_COMPRESSION = flags.DEFINE_string(
+    "compression",
+    None,
+    "Specifies the compression to use (gz, bz2, xz, or lz4).",
+)
 
 def main(_):
   # Set random seeds for deterministic data generation.
@@ -103,6 +108,10 @@ def main(_):
   )
 
   data_file = os.path.join(exp_dir, input_response_file)
+
+  if _USE_PICKLE.value and _COMPRESSION.value is not None:
+    data_file = f"{data_file}.{_COMPRESSION.value}"
+  
   logging.info("Opening data file %s", data_file)
   start_time = datetime.datetime.now()
   response_sets = psample.read_samples_from_file(data_file, _USE_PICKLE.value)
