@@ -85,34 +85,42 @@ def gather_data(_N_ITEMS, _K_RESPONSES, distortion_values, exp_dir, metrics_list
     return final_table
 
 # %%
-def plot_p_values(all_dfs, data_nk_list, metric, distortion, dataset, col, base_path):
+def plot_p_values(all_dfs, data_nk_list, metric, distortion, dataset, col, base_path, num_categories):
     if all_dfs and data_nk_list:
         plt.figure(figsize=(10, 6))
 
         for idx, nk in enumerate(data_nk_list):
             plt.plot(all_dfs[idx][col], all_dfs[idx][f"{metric}_p-value"], marker='o', label=f'NxK={nk}') 
 
-        plt.xlabel(col) 
-        plt.ylabel('p-value') 
+        title_fontsize = 30
+        label_fontsize = 30
+        tick_fontsize = 30
+        legend_fontsize = 30
+
+        plt.xlabel(col, fontsize=label_fontsize) 
+        plt.ylabel('p-value', fontsize=label_fontsize) 
         # plt.ylim((0,0.6))
         # plt.ylim((0,0.015))
         # plt.ylim((0,1))
-        plt.title(f"{dataset} ({metric}, $\\epsilon$={distortion})") 
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.18), ncols=3) 
+        plt.xticks(fontsize=tick_fontsize)
+        plt.yticks(fontsize=tick_fontsize) 
+        plt.title(f"{dataset} ({metric}, $\\epsilon$={distortion})", fontsize=title_fontsize) 
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), ncols=3, fontsize=legend_fontsize) 
         # plt.savefig(f"{base_path}/{dataset}_nk_5000_{metric}_{col}_e_{distortion}.png")
         # plt.savefig(f"{base_path}/{dataset}_p_vals_{metric}_{col}_e_{distortion}.png")
-        plt.savefig(f"{base_path}/{dataset}_p_vals_{metric}_{col}_500_e_{distortion}.png")
+        # plt.savefig(f"{base_path}/{dataset}_p_vals_{metric}_{col}_500_e_{distortion}.png")
+        plt.savefig(f"output/{dataset}_p_vals_{metric}_{col}_500_e_{distortion}.pdf", bbox_inches='tight')
         plt.close()
 
 # %%
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices/", "dataset": "DICES", "num_categories": "3",}
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_d3code/", "dataset": "D3code", "num_categories": "2",}
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ1/", "dataset": "JobsQ1", "num_categories": "5",}
+dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ1/", "dataset": "JobsQ1", "num_categories": "5",}
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ3/", "dataset": "JobsQ3", "num_categories": "12",}
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_toxicity/", "dataset": "Toxicity", "num_categories": "2",}
 
 # dataset_info = {"exp_dir": "../ptest_arr_uniform/", "dataset": "uniform", "num_categories": "2",}
-dataset_info = {"exp_dir": "../ptest_arr_gamma/", "dataset": "gamma", "num_categories": "3",}
+# dataset_info = {"exp_dir": "../ptest_arr_gamma/", "dataset": "gamma", "num_categories": "3",}
 
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices_actual_p/", "dataset": "DICES actual p-vals", "num_categories": "3",}
 
@@ -173,7 +181,7 @@ for distortion in distortion_values:
     print(f"Distortion: {distortion}, Error list len: {len(errors)}")
 
     for metric in metrics_list:
-        plot_p_values(all_dfs, data_nk_list, metric, distortion, dataset, col, base_path)
+        plot_p_values(all_dfs, data_nk_list, metric, distortion, dataset, col, base_path, _M_CATEGORIES)
         # break
 
     # break
