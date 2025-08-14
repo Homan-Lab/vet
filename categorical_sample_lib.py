@@ -248,13 +248,13 @@ def simulate_response_tables_cat(
 
 if __name__ == "__main__":
   start_time = datetime.datetime.now()
-  # response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3)
-  # response_sets, actual_response_sets = simulate_response_tables_cat(n_items=50,k_responses=10,m_categories=3,compute_actual_p_values=True)
+  response_sets = simulate_response_tables_cat(n_items=30,k_responses=50,m_categories=3)
+  # response_sets, actual_response_sets = simulate_response_tables_cat(n_items=5,k_responses=1000,m_categories=3,compute_actual_p_values=True)
   # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist=np.random.default_rng().uniform)
-  response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist="uniform",dir_prior_prob_dist_params=[0,1])
+  # response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist="uniform",dir_prior_prob_dist_params=[0,1])
   
-  logging.info(len(response_sets.alt_data_list))
-  print(len(response_sets.alt_data_list))
+  # logging.info(len(response_sets.alt_data_list))
+  # print(len(response_sets.alt_data_list))
 
   # logging.info(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
   # print(len(response_sets.alt_data_list), len(actual_response_sets.alt_data_list))
@@ -264,5 +264,11 @@ if __name__ == "__main__":
   print(f"Data generation time = {elapsed_time.total_seconds()}")
 
   start_time = datetime.datetime.now()
-  print(cmcm.cat_accuracy(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
+  print(cmcm.cat_mean_absolute_error(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
+  print(cmcm.cat_wins_mae(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
+  # print(cmcm.cat_actual_mean_absolute_error(actual_response_sets.alt_data_list[0].gold, actual_response_sets.alt_data_list[0].preds1, actual_response_sets.alt_data_list[0].preds2))
+  
+  print(cmcm.cat_kl_div(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
+  print(cmcm.cat_wins_kl(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
+
   print(f"Elapsed time = {(datetime.datetime.now() - start_time).total_seconds()}")

@@ -287,8 +287,8 @@ def cat_actual_wins_mae(
   machine2_results = np.mean(abs(human - machine2), axis=-1)
 
   return (
-      np.sum(machine1_results < machine2_results),
-      np.sum(machine1_results > machine2_results),
+      np.mean(machine1_results < machine2_results),
+      np.mean(machine1_results > machine2_results),
   )
 
 def cat_kl_div(
@@ -319,6 +319,70 @@ def cat_kl_div(
     np.mean(st.entropy(human, machine2, axis=-1, nan_policy='omit')),
   )
 
+def cat_wins_kl(
+    human: np.ndarray, machine1: np.ndarray, machine2: np.ndarray
+) -> tuple[float, float]:
+  """Compute number of wins relative to distance from human labels.
+
+  Args:
+    human: A list of human responses.
+    machine1: A list of machine responses.
+    machine2: Another list of machine responses.
+
+  Returns:
+    A 2-tuple of the itemwise distance wins between one machine and the human
+    responses, and of the other machine and the human responses.
+  """
+
+  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  human = freq_agg(human, num_categories) + 1e-12
+  machine1 = freq_agg(machine1, num_categories) + 1e-12
+  machine2 = freq_agg(machine2, num_categories) + 1e-12
+
+  # human = human/np.sum(human, axis=-1, keepdims=True)
+  # machine1 = machine1/np.sum(machine1, axis=-1, keepdims=True)
+  # machine2 = machine2/np.sum(machine2, axis=-1, keepdims=True)
+
+  machine1_results = st.entropy(human, machine1, axis=-1, nan_policy='omit')
+  machine2_results = st.entropy(human, machine2, axis=-1, nan_policy='omit')
+
+  return (
+      np.mean(machine1_results < machine2_results),
+      np.mean(machine1_results > machine2_results),
+  )
+
+def cat_spearmanr_kl(
+    human: np.ndarray, machine1: np.ndarray, machine2: np.ndarray
+) -> tuple[float, float]:
+  """Compute Spearman correlation coefficient relative to distance from human labels.
+
+  Args:
+    human: A list of human responses.
+    machine1: A list of machine responses.
+    machine2: Another list of machine responses.
+
+  Returns:
+    A 2-tuple of the itemwise distance wins between one machine and the human
+    responses, and of the other machine and the human responses.
+  """
+
+  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  human = freq_agg(human, num_categories) + 1e-12
+  machine1 = freq_agg(machine1, num_categories) + 1e-12
+  machine2 = freq_agg(machine2, num_categories) + 1e-12
+
+  # human = human/np.sum(human, axis=-1, keepdims=True)
+  # machine1 = machine1/np.sum(machine1, axis=-1, keepdims=True)
+  # machine2 = machine2/np.sum(machine2, axis=-1, keepdims=True)
+
+  machine1_results = st.entropy(human, machine1, axis=-1, nan_policy='omit')
+  machine2_results = st.entropy(human, machine2, axis=-1, nan_policy='omit')
+
+  return (
+      np.mean(machine1_results < machine2_results),
+      np.mean(machine1_results > machine2_results),
+  )
+
 def cat_actual_kl_div(
     human: np.ndarray, machine1: np.ndarray, machine2: np.ndarray
 ) -> tuple[float, float]:
@@ -333,7 +397,7 @@ def cat_actual_kl_div(
     A 2-tuple of the itemwise KL divergence between one machine and the human
     responses, and of the other machine and the human responses.
   """
-  
+
   human = human + 1e-12
   machine1 = machine1 + 1e-12
   machine2 = machine2 + 1e-12
