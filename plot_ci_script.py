@@ -23,23 +23,27 @@ import matplotlib.pyplot as plt
 params_list = [] 
 all_params_list = [] 
 ks = [x for x in range(1,11)] 
-ks.extend([x for x in range(20,1001, 20)])
+# ks.extend([x for x in range(20,1001, 20)])
+ks.extend([x for x in range(20,501, 20)])
 
-def get_n_k_for_num_ratings(all_values, num_ratings=5000): 
+def get_n_k_for_num_ratings(all_values, num_ratings=5000):
     values=[] 
     for x in all_values:
         if x==0:
             x=1 
         n = int(np.floor(num_ratings/x)) 
-        # if n > 30:
-        values.append((n, int(x))) 
+        if n > 0:
+            values.append((n, int(x))) 
     return values
+
 # vals = get_n_k_for_num_ratings(ks) 
 # [x[1] for x in vals], [x[0] for x in vals]
 ratings_list = [] 
-# nk_list = [5000]
-nk_list = [2500, 5000, 10000, 25000, 50000]
+# nk_list = [2500]
+nk_list = [100, 250, 500, 1000]
+# nk_list = [2500, 5000, 10000, 25000, 50000]
 # nk_list = [1000, 2500, 5000, 10000, 25000, 50000]
+# nk_list = [100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000]
 # for r in range(1000, 5001, 1000):
 # for r in range(5000, 5001, 500): 
 for r in nk_list:
@@ -128,7 +132,7 @@ def get_bootstrap_result(gamma_null_scores, gamma_alt_scores, confidence_level=0
 # %%
 def plot_ci(alt_ci_nk_list, nk_list, x_list, metric, distortion, dataset, col, base_path):
 
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 9))
 
     title_fontsize = 30
     label_fontsize = 30
@@ -151,14 +155,14 @@ def plot_ci(alt_ci_nk_list, nk_list, x_list, metric, distortion, dataset, col, b
     plt.xticks(fontsize=tick_fontsize)
     plt.yticks(fontsize=tick_fontsize)
     plt.title(f"CI - {dataset} ({metric}, $\\epsilon$={distortion})", fontsize=title_fontsize)
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), ncols=3, fontsize=legend_fontsize)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.4), ncols=3, fontsize=legend_fontsize)
     plt.savefig(f"{base_path}/{dataset}_CI_{metric}_{col}_500_e_{distortion}.pdf", bbox_inches='tight')
     plt.close()
 
 # %%
 def plot_ci_width(alt_ci_nk_list, nk_list, x_list, metric, distortion, dataset, col, base_path):
 
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 9))
 
     title_fontsize = 30
     label_fontsize = 30
@@ -178,7 +182,7 @@ def plot_ci_width(alt_ci_nk_list, nk_list, x_list, metric, distortion, dataset, 
     plt.xticks(fontsize=tick_fontsize)
     plt.yticks(fontsize=tick_fontsize)
     plt.title(f"CI-width - {dataset} ({metric}, $\\epsilon$={distortion})", fontsize=title_fontsize)
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), ncols=3, fontsize=legend_fontsize)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.4), ncols=3, fontsize=legend_fontsize)
     plt.savefig(f"{base_path}/{dataset}_CI_width_{metric}_{col}_500_e_{distortion}.pdf", bbox_inches='tight')
     plt.close()
 
@@ -193,11 +197,11 @@ def write_data_to_file(data, output_filename):
     logging.info("File writing time=%f", elapsed_time.total_seconds())
 
 # %%
-dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices/", "dataset": "DICES", "num_categories": "3",}
+# dataset_info = {"exp_dir": "../../../../data/ptest_arr_toxicity/", "dataset": "Toxicity", "num_categories": "2",}
+# dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices/", "dataset": "DICES", "num_categories": "3",}
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_d3code/", "dataset": "D3code", "num_categories": "2",}
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ1/", "dataset": "JobsQ1", "num_categories": "5",}
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ3/", "dataset": "JobsQ3", "num_categories": "12",}
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_toxicity/", "dataset": "Toxicity", "num_categories": "2",}
+dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ3/", "dataset": "JobsQ3", "num_categories": "12",}
 
 
 _M_CATEGORIES = dataset_info['num_categories']
@@ -214,17 +218,17 @@ col='K'
 metrics_list = ['Accuracy', 'MAE', 'Wins', 'KL-Div']
 # metric = metrics_list[1]
 
-base_path = f"output/ci_plots/{dataset}"
+base_path = f"output/ci_plots_1000/{dataset}"
 if not os.path.exists(base_path):
     os.makedirs(base_path)
 
-ci_path = f"{exp_dir}ci"
+ci_path = f"{exp_dir}ci_1000"
 if not os.path.exists(ci_path):
-    os.mkdir(ci_path)
+    os.makedirs(ci_path)
 
-scores_path = f"{exp_dir}scores"
+scores_path = f"{exp_dir}scores_1000"
 if not os.path.exists(scores_path):
-    os.mkdir(scores_path)
+    os.makedirs(scores_path)
 
 
 start_time = datetime.datetime.now()

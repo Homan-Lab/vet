@@ -8,30 +8,35 @@ from typing import Sequence
 import matplotlib.pyplot as plt
 
 # %%
-params_list = [] 
-all_params_list = [] 
+params_list = []
+all_params_list = []
 ks = [x for x in range(1,11)] 
-ks.extend([x for x in range(20,1001, 20)])
+# ks.extend([x for x in range(20,1001, 20)])
+ks.extend([x for x in range(20,101, 20)])
 
-def get_n_k_for_num_ratings(all_values, num_ratings=5000): 
-    values=[] 
+def get_n_k_for_num_ratings(all_values, num_ratings=5000):
+    values=[]
     for x in all_values:
         if x==0:
-            x=1 
-        n = int(np.floor(num_ratings/x)) 
+            x=1
+        n = int(np.floor(num_ratings/x))
         # if n > 30:
-        values.append((n, int(x))) 
+        values.append((n, int(x)))
     return values
+
+
 # vals = get_n_k_for_num_ratings(ks) 
 # [x[1] for x in vals], [x[0] for x in vals]
-ratings_list = [] 
-# nk_list = [5000]
-nk_list = [2500, 5000, 10000, 25000, 50000]
+ratings_list = []
+# nk_list = [2500]
+# nk_list = [2500, 5000, 10000, 25000, 50000]
 # nk_list = [1000, 2500, 5000, 10000, 25000, 50000]
+# nk_list = [100, 250, 500, 1000]
+nk_list = [100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000]
 # for r in range(1000, 5001, 1000):
 # for r in range(5000, 5001, 500): 
 for r in nk_list:
-    params = get_n_k_for_num_ratings(ks, r) 
+    params = get_n_k_for_num_ratings(ks, r)
     params_list.append(params)
     all_params_list.extend(params) 
     ratings_list.extend([(r-x[0]*x[1]) for x in params])
@@ -87,7 +92,7 @@ def gather_data(_N_ITEMS, _K_RESPONSES, distortion_values, exp_dir, metrics_list
 # %%
 def plot_p_values(all_dfs, data_nk_list, metric, distortion, dataset, col, base_path, num_categories):
     if all_dfs and data_nk_list:
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 9))
 
         for idx, nk in enumerate(data_nk_list):
             plt.plot(all_dfs[idx][col], all_dfs[idx][f"{metric}_p-value"], marker='o', label=f'NxK={nk}') 
@@ -104,23 +109,35 @@ def plot_p_values(all_dfs, data_nk_list, metric, distortion, dataset, col, base_
         # plt.ylim((0,1))
         plt.xticks(fontsize=tick_fontsize)
         plt.yticks(fontsize=tick_fontsize) 
-        plt.title(f"{dataset} ({metric}, $\\epsilon$={distortion})", fontsize=title_fontsize) 
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), ncols=3, fontsize=legend_fontsize) 
+        if metric=='MAE':
+            plt.title(f"{dataset} (TV, $\\epsilon$={distortion})", fontsize=title_fontsize) 
+        else:
+            plt.title(f"{dataset} ({metric}, $\\epsilon$={distortion})", fontsize=title_fontsize) 
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.4), ncols=3, fontsize=legend_fontsize) 
         # plt.savefig(f"{base_path}/{dataset}_nk_5000_{metric}_{col}_e_{distortion}.png")
         # plt.savefig(f"{base_path}/{dataset}_p_vals_{metric}_{col}_e_{distortion}.png")
         # plt.savefig(f"{base_path}/{dataset}_p_vals_{metric}_{col}_500_e_{distortion}.png")
-        plt.savefig(f"output/{dataset}_p_vals_{metric}_{col}_500_e_{distortion}.pdf", bbox_inches='tight')
+        plt.savefig(f"{base_path}/{dataset}_p_vals_{metric}_{col}_100_e_{distortion}.pdf", bbox_inches='tight')
         plt.close()
 
 # %%
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices/", "dataset": "DICES", "num_categories": "3",}
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_d3code/", "dataset": "D3code", "num_categories": "2",}
+dataset_info = {"exp_dir": "../../../../data/ptest_arr_toxicity/", "dataset": "Toxicity", "num_categories": "2",}
+dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices/", "dataset": "DICES", "num_categories": "3",}
+dataset_info = {"exp_dir": "../../../../data/ptest_arr_d3code/", "dataset": "D3code", "num_categories": "2",}
 dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ1/", "dataset": "JobsQ1", "num_categories": "5",}
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ3/", "dataset": "JobsQ3", "num_categories": "12",}
-# dataset_info = {"exp_dir": "../../../../data/ptest_arr_toxicity/", "dataset": "Toxicity", "num_categories": "2",}
+dataset_info = {"exp_dir": "../../../../data/ptest_arr_jobsQ3/", "dataset": "JobsQ3", "num_categories": "12",}
 
-# dataset_info = {"exp_dir": "../ptest_arr_uniform/", "dataset": "uniform", "num_categories": "2",}
-# dataset_info = {"exp_dir": "../ptest_arr_gamma/", "dataset": "gamma", "num_categories": "3",}
+# dataset_info = {"exp_dir": "../ptest_arr_uniform/", "dataset": "balanced", "num_categories": "2",}
+# dataset_info = {"exp_dir": "../ptest_arr_gamma/", "dataset": "unbalanced", "num_categories": "2",}
+
+# dataset_info = {"exp_dir": "../../../../shared/rc/population/ptest_arr_uniform/", "dataset": "balanced", "num_categories": "12",}
+# dataset_info = {"exp_dir": "../../../../shared/rc/population/ptest_arr_gamma/", "dataset": "unbalanced", "num_categories": "12",}
+
+# dataset_info = {"exp_dir": "../ptest_arr_uniform/", "dataset": "uniform", "num_categories": "5",}
+# dataset_info = {"exp_dir": "../ptest_arr_gamma/", "dataset": "gamma", "num_categories": "5",}
+
+# dataset_info = {"exp_dir": "../../../../shared/rc/population/ptest_arr_uniform/", "dataset": "uniform", "num_categories": "12",}
+# dataset_info = {"exp_dir": "../../../../shared/rc/population/ptest_arr_gamma/", "dataset": "gamma", "num_categories": "12",}
 
 # dataset_info = {"exp_dir": "../../../../data/ptest_arr_dices_actual_p/", "dataset": "DICES actual p-vals", "num_categories": "3",}
 
@@ -134,6 +151,7 @@ distortion = 0.1
 distortion_values = [0.1, 0.2, 0.3, 0.4]
 # distortion_values = [0.15, 0.2, 0.3, 0.4]
 # distortion_values = [0.1, 0.15, 0.2, 0.3, 0.4]
+# distortion_values = [0.3]
 
 metrics_list = ['Accuracy', 'MAE', 'Wins', 'KL-Div']
 
@@ -144,9 +162,12 @@ actual_p = False
 # base_path = "output/actual_p"
 
 # base_path = "output/artificial"
-base_path = "output"
+# base_path = "output"
+# base_path = f"output/K100/pvals_plots/artificial/{dataset}/cat{_M_CATEGORIES}"
+# base_path = f"output/K100/pvals_plots/{dataset}"
+base_path = f"output/K100_new/pvals_plots/{dataset}"
 if not os.path.exists(base_path):
-    os.mkdir(base_path)
+    os.makedirs(base_path)
 
 # _N_ITEMS = 5000 
 # _K_RESPONSES = 1
