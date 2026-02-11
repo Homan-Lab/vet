@@ -36,7 +36,7 @@ import datetime
 import enum
 import functools
 import json
-import pickle
+import compress_pickle
 import random as rand
 from typing import Any, Callable, List, Tuple
 
@@ -428,7 +428,7 @@ def read_samples_from_file(
   """
   open_mode = "rb" if use_pickle else "r"
   with open(input_filename, open_mode) as f:
-    response_sets_dict = pickle.load(f) if use_pickle else json.load(f)
+    response_sets_dict = compress_pickle.load(f) if use_pickle else json.load(f)
 
   return datatypes.ResponseSets.from_dict(response_sets_dict)
 
@@ -449,7 +449,7 @@ def write_samples_to_file(
   open_mode = "wb" if use_pickle else "w"
   with open(output_filename, open_mode) as f:
     if use_pickle:
-      pickle.dump(response_sets.to_dict(), f)
+      compress_pickle.dump(response_sets.to_dict(), f)
     else:
       json.dump(response_sets.to_dict(), f)
 

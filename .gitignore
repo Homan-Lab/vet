@@ -1,0 +1,15 @@
+*.json
+*.csv
+*.pdf
+
+# Local
+.vscode
+data
+output
+
+# Mac
+.DS_Store
+
+__pycache__\
+*.py[cod]
+*$py.class

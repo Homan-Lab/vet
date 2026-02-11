@@ -66,10 +66,20 @@ _USE_PICKLE = flags.DEFINE_boolean(
     "If true load the data using pickle. Otherwise load using json."
     "Pickle is much faster as it saves the data in binary format.",
 )
+_USE_MULTIPROCESSING = flags.DEFINE_boolean(
+    "use_multiprocessing",
+    False,
+    "If true use multiprocessing, otherwise run trials serially.",
+)
 _RANDOM_SEED = flags.DEFINE_integer(
     "random_seed",
     None,
     "When set, it generates the data in deterministically across runs.",
+)
+_COMPRESSION = flags.DEFINE_string(
+    "compression",
+    None,
+    "Specifies the compression to use (gz, bz2, xz, or lz4).",
 )
 
 def main(_):
@@ -83,6 +93,7 @@ def main(_):
   k_responses = _K_RESPONSES.value
   config_file = _CONFIG_FILE.value
   config_line_num = _LINE_NUM.value
+  use_multiprocessing = _USE_MULTIPROCESSING.value
 
   logging.info(
       "Running ptest experiments with command line arguments:"
@@ -97,6 +108,10 @@ def main(_):
   )
 
   data_file = os.path.join(exp_dir, input_response_file)
+
+  if _USE_PICKLE.value and _COMPRESSION.value is not None:
+    data_file = f"{data_file}.{_COMPRESSION.value}"
+  
   logging.info("Opening data file %s", data_file)
   start_time = datetime.datetime.now()
   response_sets = psample.read_samples_from_file(data_file, _USE_PICKLE.value)
@@ -122,6 +137,7 @@ def main(_):
       config_line_num,
       k_responses,
       output_file_path,
+      use_multiprocessing,
   )
 
   logging.info("Experiments set up. Getting ready to run.")
