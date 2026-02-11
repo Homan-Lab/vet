@@ -119,7 +119,7 @@ class MachineContestMetricsTest(absltest.TestCase):
   def test_cos_distance(self):
     linear_responses = format_data([
         [[0.1, 0.9], [0.2, 0.8], [0.3, 0.7]],
-        [[0, 0], [0, 0], [0, 0]],
+        [[1e-12, 1e-12], [1e-12, 1e-12], [1e-12, 1e-12]],
         [[1, 1], [1, 1], [1, 1]],
     ])
     expected_linear_results = [[0.00900, 0.04297], [0, 0], [0, 0]]

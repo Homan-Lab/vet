@@ -178,8 +178,8 @@ def root_mean_squared_error(
     human responses, and of the other machine at the human responses.
   """
   return (
-      sklearn.metrics.mean_squared_error(human, machine1, squared=False),
-      sklearn.metrics.mean_squared_error(human, machine2, squared=False),
+      sklearn.metrics.root_mean_squared_error(human, machine1),
+      sklearn.metrics.root_mean_squared_error(human, machine2),
   )
 
 def f1_score(
