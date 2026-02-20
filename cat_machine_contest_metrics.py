@@ -5,12 +5,45 @@ from scipy.spatial.distance import jensenshannon
 import sklearn.metrics
 
 def binarize(scores: np.ndarray, threshold: float) -> np.ndarray:
+  """Convert an array of scores into a binary array based on a threshold.
+
+  Args:
+    scores (np.ndarray): An array of scores to be binarized.
+    threshold (float): The threshold value for binarization.
+      Scores below this value will be set to 0,
+      and scores equal to or above this value will be set to 1.
+
+  Returns:
+    np.ndarray: The binarized array.
+  """
   return np.where(scores < threshold, 0, 1)
 
 def freq_agg(arr: np.ndarray, num_categories: int = 3) -> np.ndarray:
-  return np.apply_along_axis(lambda x: np.bincount(x, minlength=num_categories), axis=1, arr=arr)
+  """Convert an array of category labels into an array of category frequencies.
+
+  Args:
+    arr (np.ndarray): An array of integer category labels.
+    num_categories (int, optional): The number of categories. Defaults to 3.
+
+  Returns:
+    np.ndarray: An array of category frequencies for each row in `arr`.
+  """
+  return np.apply_along_axis(
+    lambda x: np.bincount(x, minlength=num_categories),
+    axis=1,
+    arr=arr)
 
 def majority_vote(arr: np.ndarray, num_categories: int = 3) -> np.ndarray:
+  """Convert an array of category labels into an array of
+    majority category labels.
+
+  Args:
+    arr (np.ndarray): An array of integer category labels.
+    num_categories (int, optional): The number of categories. Defaults to 3.
+  
+  Returns:
+    np.ndarray: An array of majority category labels for each row in `arr`.
+  """
   counts = freq_agg(arr=arr, num_categories=num_categories)
   return np.argmax(counts, axis=1)
 
@@ -20,9 +53,6 @@ def cat_accuracy(
     machine2: np.ndarray,
 ) -> tuple[float, float]:
   """Compute accuracy relative to human labels.
-
-  The params ht, mt1 and mt2 can be specified via a config string,
-  so we use short names for them.
 
   Args:
     human: A list of human scores.
@@ -34,7 +64,8 @@ def cat_accuracy(
     human scores.
   """
 
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = majority_vote(human, num_categories)
   machine1 = majority_vote(machine1, num_categories)
   machine2 = majority_vote(machine2, num_categories)
@@ -50,9 +81,6 @@ def cat_actual_accuracy(
     machine2: np.ndarray,
 ) -> tuple[float, float]:
   """Compute accuracy relative to human labels.
-
-  The params ht, mt1 and mt2 can be specified via a config string,
-  so we use short names for them.
 
   Args:
     human: A list of human scores.
@@ -80,9 +108,6 @@ def cat_auc(
 ) -> tuple[float, float]:
   """Compute ROC AUC relative to human labels.
 
-  The params ht, mt1 and mt2 can be specified via a config string,
-  so we use short names for them.
-
   Args:
     human: A list of human scores.
     machine1: A list of machine scores.
@@ -105,9 +130,6 @@ def cat_f1_score(
 ) -> tuple[float, float]:
   """Compute f1-score relative to human labels.
 
-  The params ht, mt1 and mt2 can be specified via a config string,
-  so we use short names for them.
-
   Args:
     human: A 2D array of human responses.
     machine1: A 2D array of machine responses.
@@ -119,7 +141,8 @@ def cat_f1_score(
     human responses.
   """
 
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = majority_vote(human, num_categories)
   machine1 = majority_vote(machine1, num_categories)
   machine2 = majority_vote(machine2, num_categories)
@@ -136,9 +159,6 @@ def cat_precision(
 ) -> tuple[float, float]:
   """Compute precision relative to human labels.
 
-  The params ht, mt1 and mt2 can be specified via a config string,
-  so we use short names for them.
-
   Args:
     human: A list of human scores.
     machine1: A list of machine scores.
@@ -149,7 +169,8 @@ def cat_precision(
     human scores.
   """
 
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = majority_vote(human, num_categories)
   machine1 = majority_vote(machine1, num_categories)
   machine2 = majority_vote(machine2, num_categories)
@@ -166,9 +187,6 @@ def cat_recall(
 ) -> tuple[float, float]:
   """Compute recall relative to human labels.
 
-  The params ht, mt1 and mt2 can be specified via a config string,
-  so we use short names for them.
-
   Args:
     human: A list of human scores.
     machine1: A list of machine scores.
@@ -179,7 +197,8 @@ def cat_recall(
     human scores.
   """
   
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = majority_vote(human, num_categories)
   machine1 = majority_vote(machine1, num_categories)
   machine2 = majority_vote(machine2, num_categories)
@@ -203,7 +222,8 @@ def cat_mean_absolute_error(
     A 2-tuple of the itemwise distance mean between one machine and the human
     responses, and of the other machine and the human responses.
   """
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = freq_agg(human, num_categories)
   machine1 = freq_agg(machine1, num_categories)
   machine2 = freq_agg(machine2, num_categories)
@@ -250,7 +270,8 @@ def cat_wins_mae(
     responses, and of the other machine and the human responses.
   """
 
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = freq_agg(human, num_categories)
   machine1 = freq_agg(machine1, num_categories)
   machine2 = freq_agg(machine2, num_categories)
@@ -300,7 +321,8 @@ def cat_kl_div(
     A 2-tuple of the itemwise KL divergence between one machine and the human
     responses, and of the other machine and the human responses.
   """
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = freq_agg(human, num_categories) + 1e-12
   machine1 = freq_agg(machine1, num_categories) + 1e-12
   machine2 = freq_agg(machine2, num_categories) + 1e-12
@@ -348,7 +370,8 @@ def cat_jsd(
     A 2-tuple of the itemwise Jensen-Shannon distance between one machine and the human
     responses, and of the other machine and the human responses.
   """
-  num_categories = np.max(np.concatenate((human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
+  num_categories = np.max(np.concatenate((
+    human.flatten(), machine1.flatten(), machine2.flatten()))) + 1
   human = freq_agg(human, num_categories) + 1e-12
   machine1 = freq_agg(machine1, num_categories) + 1e-12
   machine2 = freq_agg(machine2, num_categories) + 1e-12
