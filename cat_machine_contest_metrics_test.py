@@ -6,12 +6,14 @@ import cat_machine_contest_metrics
 class CatMachineContestMetricsTest(absltest.TestCase):
 
   def test_binarize(self):
+    # Test the binarize function with a simple example
     scores = np.array([0.1, 0.5, 0.8])
     out = cat_machine_contest_metrics.binarize(scores, 0.5)
     expected = np.array([0, 1, 1])
     np.testing.assert_array_equal(out, expected)
 
   def test_freq_and_majority(self):
+    # Test the frequency aggregation and majority vote functions
     arr = np.array([[0, 1, 1], [2, 2, 0]])
     freq = cat_machine_contest_metrics.freq_agg(arr, num_categories=3)
     np.testing.assert_array_equal(freq, np.array([[1, 2, 0], [1, 0, 2]]))
@@ -29,7 +31,7 @@ class CatMachineContestMetricsTest(absltest.TestCase):
     self.assertAlmostEqual(acc1, 1.0)
     self.assertLess(acc2, acc1)
 
-    f1_1, f1_2 = cat_machine_contest_metrics.cat_f1_score(
+    f1_1, _ = cat_machine_contest_metrics.cat_f1_score(
       human, machine1, machine2)
     self.assertAlmostEqual(f1_1, 1.0)
 
@@ -76,7 +78,7 @@ class CatMachineContestMetricsTest(absltest.TestCase):
     self.assertGreaterEqual(wins2, 0)
     self.assertGreater(wins1, wins2)
 
-    a_w1, a_w2 = cat_machine_contest_metrics.cat_actual_wins_mae(
+    a_w1, _ = cat_machine_contest_metrics.cat_actual_wins_mae(
       human_act, m1_act, m2_act)
     self.assertGreaterEqual(a_w1, 0)
 
@@ -95,7 +97,7 @@ class CatMachineContestMetricsTest(absltest.TestCase):
     human_prob = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
     m1_prob = human_prob.copy()
     m2_prob = np.array([[0.5, 0.5, 0.0], [0.2, 0.7, 0.1]])
-    akt1, akt2 = cat_machine_contest_metrics.cat_actual_kl_div(
+    akt1, _ = cat_machine_contest_metrics.cat_actual_kl_div(
       human_prob, m1_prob, m2_prob)
     self.assertAlmostEqual(akt1, 0.0, places=6)
 

@@ -19,10 +19,10 @@ def binarize(scores: np.ndarray, threshold: float) -> np.ndarray:
   return np.where(scores < threshold, 0, 1)
 
 def freq_agg(arr: np.ndarray, num_categories: int = 0) -> np.ndarray:
-  """Convert an array of category labels into an array of category frequencies.
+  """Convert a 2D-array of category labels into a 2D-array of category frequencies.
 
   Args:
-    arr (np.ndarray): An array of integer category labels.
+    arr (np.ndarray): A 2D array of integer category labels.
     num_categories (int, optional): The number of categories. Defaults to 0.
 
   Returns:
