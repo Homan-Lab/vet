@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 from absl import logging
 import numpy as np
@@ -17,7 +17,7 @@ def gen_dirichlet_samples(
       n (int): Number of samples to generate.
 
   Returns:
-      np.ndarray: Samples generated from a dirichlet distribution 
+      np.ndarray: Samples generated from a dirichlet distribution
   """
   rng = np.random.default_rng()
 
@@ -39,7 +39,8 @@ def distort_parameters_cat(
   Returns:
       np.ndarray: Distorted parameters
   """
-  distorted_params = (1 - distortion) * categorical_params + distortion * noise_params
+  distorted_params = (1 - distortion) * \
+    categorical_params + distortion * noise_params
   return distorted_params
 
 def gen_alt_responses_cat(
@@ -55,17 +56,21 @@ def gen_alt_responses_cat(
       k_responses (int): Number of responses
 
   Returns:
-      Tuple[np.ndarray, np.ndarray, np.ndarray,]: Generated data for gold and two machines
+      Tuple[np.ndarray, np.ndarray, np.ndarray,]: Generated data for gold
+        and two machines
   """
   rng = np.random.default_rng()
   responses_gold = np.column_stack(
-    [rng.multinomial(1, categorical_params).argmax(axis=-1) for _ in range(k_responses)]
+    [rng.multinomial(1, categorical_params).argmax(axis=-1)
+     for _ in range(k_responses)]
   )
   responses_y = np.column_stack(
-    [rng.multinomial(1, categorical_params).argmax(axis=-1) for _ in range(k_responses)]
+    [rng.multinomial(1, categorical_params).argmax(axis=-1)
+     for _ in range(k_responses)]
   )
   responses_z = np.column_stack(
-    [rng.multinomial(1, distorted_params).argmax(axis=-1) for _ in range(k_responses)]
+    [rng.multinomial(1, distorted_params).argmax(axis=-1)
+     for _ in range(k_responses)]
   )
   return responses_gold, responses_y, responses_z
 
@@ -86,8 +91,8 @@ def mix_arrays(
   choices =  rng.integers(2, size=(array_1.shape[0]))
 
   mixed_arrays = np.zeros(array_1.shape)
-  mixed_arrays[choices==0] = array_1[choices==0]
-  mixed_arrays[choices==1] = array_2[choices==1]
+  mixed_arrays[choices == 0] = array_1[choices == 0]
+  mixed_arrays[choices == 1] = array_2[choices == 1]
 
   return mixed_arrays
 
@@ -104,18 +109,22 @@ def gen_null_responses_cat(
       k_responses (int): Number of responses
 
   Returns:
-      Tuple[np.ndarray, np.ndarray, np.ndarray,]: Generated data for gold and two machines
+      Tuple[np.ndarray, np.ndarray, np.ndarray,]: Generated data for gold
+        and two machines
   """
   rng = np.random.default_rng()
 
   responses_gold = np.column_stack(
-    [rng.multinomial(1, categorical_params_null).argmax(axis=-1) for _ in range(k_responses)]
+    [rng.multinomial(1, categorical_params_null).argmax(axis=-1)
+     for _ in range(k_responses)]
   )
   responses_y = np.column_stack(
-    [rng.multinomial(1, mix_arrays(categorical_params_null, distorted_params_null)).argmax(axis=-1) for _ in range(k_responses)]
+    [rng.multinomial(1, mix_arrays(categorical_params_null, distorted_params_null)).argmax(
+      axis=-1) for _ in range(k_responses)]
   )
   responses_z = np.column_stack(
-    [rng.multinomial(1, mix_arrays(distorted_params_null, categorical_params_null)).argmax(axis=-1) for _ in range(k_responses)]
+    [rng.multinomial(1, mix_arrays(distorted_params_null, categorical_params_null)).argmax(
+      axis=-1) for _ in range(k_responses)]
   )
   return responses_gold, responses_y, responses_z
 
@@ -127,8 +136,8 @@ def simulate_response_tables_cat(
     noise_parameters: List[float] = [0.333, 0.333, 0.334],
     distortion: float = 0.1,
     num_samples: int = 1000,
-    dir_prior_prob_dist: str = None,
-    dir_prior_prob_dist_params: List[Any] = None,
+    dir_prior_prob_dist: Optional[str] = None,
+    dir_prior_prob_dist_params: Optional[List[Any]] = None,
     compute_actual_p_values: bool = False,
 ) -> datatypes.ResponseSets:
   """Generates a collection of machine responses.
@@ -160,8 +169,10 @@ def simulate_response_tables_cat(
   responses_alt = []
   responses_null = []
 
-  if len(noise_parameters)!=m_categories:
-    logging.info(f"Length of noise parameters: {len(noise_parameters)} does not match the number of categories: {m_categories}")
+  if len(noise_parameters) != m_categories:
+    logging.info(
+      f"Length of noise parameters: {len(noise_parameters)} does \
+      not match the number of categories: {m_categories}")
     noise_parameters = [1.0/m_categories]*m_categories
     logging.info(f"Using uniform noise parameters: {noise_parameters}")
 
@@ -174,12 +185,17 @@ def simulate_response_tables_cat(
       dir_prior_dist = prior_distributions.get(dir_prior_prob_dist)
       if dir_prior_dist:
         if dir_prior_prob_dist_params is not None:
-          alpha = dir_prior_dist(*list(map(float, dir_prior_prob_dist_params)), size=m_categories)
+          alpha = dir_prior_dist(
+            *list(map(float, dir_prior_prob_dist_params)), size=m_categories)
         else:
           alpha = dir_prior_dist(size=m_categories)
         if len(alpha) != m_categories:
-          logging.info(f"Length of alpha parameters: {len(alpha)} do not match the number of categories: {m_categories}")
-          print(f"Length of alpha parameters: {len(alpha)} do not match the number of categories: {m_categories}")
+          logging.info(
+            f"Length of alpha parameters: {len(alpha)} do not match \
+              the number of categories: {m_categories}")
+          print(
+            f"Length of alpha parameters: {len(alpha)} do not match \
+              the number of categories: {m_categories}")
           break
       else:
         logging.info("Prior distribution not supported")
@@ -189,9 +205,11 @@ def simulate_response_tables_cat(
     categorical_params = gen_dirichlet_samples(alpha=alpha, n=n_items)
     noise_params = gen_dirichlet_samples(alpha=noise_parameters, n=n_items)
 
-    distorted_params = distort_parameters_cat(categorical_params, noise_params, distortion)
+    distorted_params = distort_parameters_cat(
+      categorical_params, noise_params, distortion)
 
-    responses_gold, responses_y, responses_z = gen_alt_responses_cat(categorical_params, distorted_params, k_responses)
+    responses_gold, responses_y, responses_z = gen_alt_responses_cat(
+      categorical_params, distorted_params, k_responses)
 
     responses_alt.append(
         datatypes.ResponseData(
@@ -202,27 +220,37 @@ def simulate_response_tables_cat(
     if compute_actual_p_values:
       actual_responses_alt.append(
         datatypes.ResponseData(
-            gold=categorical_params, preds1=categorical_params, preds2=distorted_params
+            gold=categorical_params,
+            preds1=categorical_params,
+            preds2=distorted_params
         )
       )
 
     categorical_params_null = gen_dirichlet_samples(alpha=alpha, n=n_items)
-    noise_params_null = gen_dirichlet_samples(alpha=noise_parameters, n=n_items)
+    noise_params_null = gen_dirichlet_samples(
+      alpha=noise_parameters, n=n_items)
 
-    distorted_params_null = distort_parameters_cat(categorical_params_null, noise_params_null, distortion)
+    distorted_params_null = distort_parameters_cat(
+      categorical_params_null, noise_params_null, distortion)
 
-    responses_gold_null, responses_y_null, responses_z_null = gen_null_responses_cat(categorical_params_null, distorted_params_null, k_responses)
+    responses_gold_null, responses_y_null, responses_z_null = \
+      gen_null_responses_cat(
+        categorical_params_null, distorted_params_null, k_responses)
     
     responses_null.append(
         datatypes.ResponseData(
-            gold=responses_gold_null, preds1=responses_y_null, preds2=responses_z_null
+            gold=responses_gold_null,
+            preds1=responses_y_null,
+            preds2=responses_z_null
         )
     )
 
     if compute_actual_p_values:
       actual_responses_null.append(
           datatypes.ResponseData(
-              gold=categorical_params_null, preds1=categorical_params_null, preds2=distorted_params_null
+              gold=categorical_params_null,
+              preds1=categorical_params_null,
+              preds2=distorted_params_null
           )
       )
 
@@ -232,7 +260,8 @@ def simulate_response_tables_cat(
 
   if compute_actual_p_values:
     actual_response_sets = datatypes.ResponseSets(
-        alt_data_list=actual_responses_alt, null_data_list=actual_responses_null
+        alt_data_list=actual_responses_alt,
+        null_data_list=actual_responses_null
     )
     return response_sets, actual_response_sets
 
@@ -240,7 +269,12 @@ def simulate_response_tables_cat(
 
 if __name__ == "__main__":
   start_time = datetime.datetime.now()
-  response_sets = simulate_response_tables_cat(n_items=3,k_responses=5,m_categories=3,dir_prior_prob_dist="uniform",dir_prior_prob_dist_params=[0,1])
+  response_sets = simulate_response_tables_cat(
+    n_items=3,
+    k_responses=5,
+    m_categories=3,
+    dir_prior_prob_dist="uniform",
+    dir_prior_prob_dist_params=[0,1])
   
   logging.info(len(response_sets.alt_data_list))
   print(len(response_sets.alt_data_list))
@@ -250,5 +284,9 @@ if __name__ == "__main__":
   print(f"Data generation time = {elapsed_time.total_seconds()}")
 
   start_time = datetime.datetime.now()
-  print(cmcm.cat_accuracy(response_sets.alt_data_list[0].gold, response_sets.alt_data_list[0].preds1, response_sets.alt_data_list[0].preds2))
-  print(f"Elapsed time = {(datetime.datetime.now() - start_time).total_seconds()}")
+  print(cmcm.cat_accuracy(
+    response_sets.alt_data_list[0].gold,
+    response_sets.alt_data_list[0].preds1,
+    response_sets.alt_data_list[0].preds2))
+  print(
+    f"Elapsed time = {(datetime.datetime.now() - start_time).total_seconds()}")
