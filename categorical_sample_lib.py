@@ -8,20 +8,20 @@ import cat_machine_contest_metrics as cmcm
 
 def gen_dirichlet_samples(
     alpha: List[float],
-    n: int,
+    num_samples: int,
 ) -> np.ndarray:
   """Generates n samples from a dirichlet distribution with parameters alpha.
 
   Args:
       alpha (List[float]): Parameters of the dirichlet distribution.
-      n (int): Number of samples to generate.
+      num_samples (int): Number of samples to generate.
 
   Returns:
       np.ndarray: Samples generated from a dirichlet distribution
   """
   rng = np.random.default_rng()
 
-  samples = rng.dirichlet(alpha, n)
+  samples = rng.dirichlet(alpha, num_samples)
   return samples
 
 def distort_parameters_cat(
@@ -78,7 +78,7 @@ def mix_arrays(
     array_1: np.ndarray,
     array_2: np.ndarray,
 ) -> np.ndarray:
-  """Mixes two numpy arrays
+  """Mixes two arrays by randomly choosing elements from each array.
 
   Args:
       array1 (np.ndarray): array one
@@ -88,11 +88,9 @@ def mix_arrays(
       np.ndarray: mixed arrays
   """
   rng = np.random.default_rng()
-  choices =  rng.integers(2, size=(array_1.shape[0]))
+  random_mask = rng.choice([True, False], size=(array_1.shape[0]))
 
-  mixed_arrays = np.zeros(array_1.shape)
-  mixed_arrays[choices == 0] = array_1[choices == 0]
-  mixed_arrays[choices == 1] = array_2[choices == 1]
+  mixed_arrays = np.where(random_mask[:, np.newaxis], array_1, array_2)
 
   return mixed_arrays
 
@@ -202,8 +200,10 @@ def simulate_response_tables_cat(
         print("Prior distribution not supported")
         break
 
-    categorical_params = gen_dirichlet_samples(alpha=alpha, n=n_items)
-    noise_params = gen_dirichlet_samples(alpha=noise_parameters, n=n_items)
+    categorical_params = gen_dirichlet_samples(
+      alpha=alpha, num_samples=n_items)
+    noise_params = gen_dirichlet_samples(
+      alpha=noise_parameters, num_samples=n_items)
 
     distorted_params = distort_parameters_cat(
       categorical_params, noise_params, distortion)
@@ -226,9 +226,10 @@ def simulate_response_tables_cat(
         )
       )
 
-    categorical_params_null = gen_dirichlet_samples(alpha=alpha, n=n_items)
+    categorical_params_null = gen_dirichlet_samples(
+      alpha=alpha, num_samples=n_items)
     noise_params_null = gen_dirichlet_samples(
-      alpha=noise_parameters, n=n_items)
+      alpha=noise_parameters, num_samples=n_items)
 
     distorted_params_null = distort_parameters_cat(
       categorical_params_null, noise_params_null, distortion)

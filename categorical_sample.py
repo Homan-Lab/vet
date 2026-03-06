@@ -12,8 +12,9 @@ from absl import app
 from absl import flags
 from absl import logging
 import numpy as np
-from parameterized_sample_lib import write_samples_to_file
-import categorical_sample_lib as cat_sample
+
+import parameterized_sample_lib
+import categorical_sample_lib
 
 _DISTORTION = flags.DEFINE_float(
     "distortion", 0.3, "Amount of distortion between machines."
@@ -33,7 +34,7 @@ _M_CATEGORIES = flags.DEFINE_integer(
 )
 _ALPHA = flags.DEFINE_list(
     "alpha",
-    [5.21765954, 0.85824731, 2.74833849],
+    [0.6, 0.1, 0.3],
     "Parameters for the dirichlet distribution",
 )
 _NOISE_PARAMS = flags.DEFINE_list(
@@ -73,7 +74,7 @@ _COMPUTE_ACTUAL_P_VALUES = flags.DEFINE_boolean(
 _COMPRESSION = flags.DEFINE_string(
     "compression",
     None,
-    "Specifies the compression to use (gz, bz2, xz, or lz4).",
+    "Specifies the compression to use (gz, bz2, xz, or lz4) for output files.",
 )
 
 # for how to use this library.
@@ -87,17 +88,19 @@ def main(argv: Sequence[str]) -> None:
 
   generation_start_time = datetime.datetime.now()
   
-  response_sets, actual_response_sets = cat_sample.simulate_response_tables_cat(
-    N_ITEMS.value,
-    K_RESPONSES.value,
-    M_CATEGORIES.value,
-    ALPHA.value,
-    NOISE_PARAMS.value,
-    DISTORTION.value,
-    NUM_SAMPLES.value,
-    DIR_PRIOR_PROB_DIST.value,
-    DIR_PRIOR_PROB_DIST_PARAMS.value,
-    COMPUTE_ACTUAL_P_VALUES.value,
+  response_sets, actual_response_sets = (
+    categorical_sample_lib.simulate_response_tables_cat(
+      _N_ITEMS.value,
+      _K_RESPONSES.value,
+      _M_CATEGORIES.value,
+      _ALPHA.value,
+      _NOISE_PARAMS.value,
+      _DISTORTION.value,
+      _NUM_SAMPLES.value,
+      _DIR_PRIOR_PROB_DIST.value,
+      _DIR_PRIOR_PROB_DIST_PARAMS.value,
+      _COMPUTE_ACTUAL_P_VALUES.value,
+    )
   )
     
   elapsed_time = datetime.datetime.now() - generation_start_time
@@ -116,7 +119,7 @@ def main(argv: Sequence[str]) -> None:
       f"{_N_ITEMS.value}_K={_K_RESPONSES.value}_M={_M_CATEGORIES.value}"
       f"_num_samples={_NUM_SAMPLES.value}.{file_extension}",
   )
-  write_samples_to_file(
+  parameterized_sample_lib.write_samples_to_file(
       response_sets, output_filename, _USE_PICKLE.value
   )
   
@@ -127,7 +130,7 @@ def main(argv: Sequence[str]) -> None:
         f"{_N_ITEMS.value}_K={_K_RESPONSES.value}_M={_M_CATEGORIES.value}"
         f"_num_samples={_NUM_SAMPLES.value}.{file_extension}",
     )
-    write_samples_to_file(
+    parameterized_sample_lib.write_samples_to_file(
         actual_response_sets, output_filename, _USE_PICKLE.value
     )
 

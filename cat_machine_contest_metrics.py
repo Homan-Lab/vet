@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import scipy.stats as st
 from scipy.spatial.distance import jensenshannon
@@ -18,7 +20,8 @@ def binarize(scores: np.ndarray, threshold: float) -> np.ndarray:
   """
   return np.where(scores < threshold, 0, 1)
 
-def freq_agg(arr: np.ndarray, num_categories: int = 0) -> np.ndarray:
+def freq_agg(arr: np.ndarray, num_categories: int = 0
+) -> np.ndarray[Any, np.dtype[np.int_]]:
   """Convert a 2D-array of category labels into a 2D-array of category frequencies.
 
   Args:
@@ -34,7 +37,8 @@ def freq_agg(arr: np.ndarray, num_categories: int = 0) -> np.ndarray:
     arr=arr)
 
 def majority_vote(arr: np.ndarray, num_categories: int = 0) -> np.ndarray:
-  """Convert matrix of integer categories into array of row-wise pluralities.
+  """Convert matrix of integer categories into array of row-wise pluralities
+    (plurality along the column).
 
   Args:
     arr (np.ndarray): A matrix of integer category labels.
