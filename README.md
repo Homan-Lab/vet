@@ -89,19 +89,39 @@ Where:
 ```
 
 ```shell
-@article{homan2024many,
-  title={How Many Ratings per Item are Necessary for Reliable Significance Testing?},
-  author={Homan, Christopher and Korn, Flip and Pandita, Deepak and Welty, Chris},
-  journal={arXiv preprint arXiv:2412.02968},
-  year={2024}
+@article{Pandita_Korn_Welty_Homan_2026,
+  title={Forest vs Tree: The (N, K) Trade-off in Reproducible ML Evaluation},
+  volume={40},
+  url={https://ojs.aaai.org/index.php/AAAI/article/view/39659},
+  DOI={10.1609/aaai.v40i29.39659},
+  abstractNote={Reproducibility is a cornerstone of scientific validation and of the authority it confers on its results. Reproducibility in machine learning evaluations leads to greater trust, confidence, and value. However, the ground truth responses used in machine learning often necessarily come from humans, among whom disagreement is prevalent, and surprisingly little research has studied the impact of effectively ignoring disagreement in these responses, as is typically the case. One reason for the lack of research is that budgets for collecting human-annotated evaluation data are limited, and obtaining more samples from multiple raters for each example greatly increases the per-item annotation costs. We investigate the trade-off between the number of items (N) and the number of responses per item (K) needed for reliable machine learning evaluation. We analyze a diverse collection of categorical datasets for which multiple annotations per item exist, and simulated distributions fit to these datasets, to determine the optimal (N, K) configuration, given a fixed budget (N x K), for collecting evaluation data and reliably comparing the performance of machine learning models. Our findings show, first, that accounting for human disagreement may come with N x K at no more than 1000 (and often much lower) for every dataset tested on at least one metric. Moreover, this minimal N x K almost always occurred for K &gt; 10. Furthermore, the nature of the tradeoff between K and N, or if one even existed, depends on the evaluation metric, with metrics that are more sensitive to the full distribution of responses performing better at higher levels of K. Our methods can be used to help ML practitioners get more effective test data by finding the optimal metrics and number of items and annotations per item to collect to get the most reliability for their budget.},
+  number={29},
+  journal={Proceedings of the AAAI Conference on Artificial Intelligence},
+  author={Pandita, Deepak and Korn, Flip and Welty, Chris and Homan, Christopher M},
+  year={2026}, 
+  month={Mar.}, 
+  pages={24736-24744}
 }
 ```
 
 ```shell
-@article{pandita2025forest,
-  title={Forest vs Tree: The $(N, K) $ Trade-off in Reproducible ML Evaluation},
-  author={Pandita, Deepak and Korn, Flip and Welty, Chris and Homan, Christopher M},
-  journal={arXiv preprint arXiv:2508.03663},
-  year={2025}
+@inproceedings{homan-etal-2026-many,
+    title = "How Many Ratings per Item are Necessary for Reliable Significance Testing?",
+    author = "Homan, Christopher M  and
+      Korn, Flip  and
+      Pandita, Deepak  and
+      Welty, Chris",
+    editor = "Demberg, Vera  and
+      Inui, Kentaro  and
+      Marquez, Llu{\'i}s",
+    booktitle = "Findings of the {A}ssociation for {C}omputational {L}inguistics: {EACL} 2026",
+    month = mar,
+    year = "2026",
+    address = "Rabat, Morocco",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2026.findings-eacl.223/",
+    pages = "4258--4273",
+    ISBN = "979-8-89176-386-9",
+    abstract = "A cornerstone of machine learning evaluation is the (often hidden) assumption that model and human responses are reliable enough to evaluate models against unitary, authoritative, ``gold standard'' data, via simple metrics such as accuracy, precision, and recall. The generative AI revolution would seem to explode this assumption, given the critical role stochastic inference plays. Yet, in spite of public demand for more transparency in AI{---}along with strong evidence that humans are unreliable judges{---}estimates of model reliability are conventionally based on, at most, a few output responses per input item. We adapt a method, previously used to evaluate the reliability of various metrics and estimators for machine learning evaluation, to determine whether an (existing or planned) dataset has enough responses per item to assure reliable null hypothesis statistical testing. We show that, for many common metrics, collecting even 5-10 responses per item (from each model and team of human evaluators) is not sufficient. We apply our methods to several of the very few extant gold standard test sets with multiple disaggregated responses per item and show that even these datasets lack enough responses per item. We show how our methods can help AI researchers make better decisions about how to collect data for AI evaluation."
 }
 ```
